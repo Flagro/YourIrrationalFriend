@@ -16,34 +16,13 @@ import asyncio
 from typing import Literal, Optional
 from functools import partial
 
-from .utils import (
-    get_context,
-    get_person,
-    get_message,
-    get_args,
-    buffer_streaming_response,
-    is_group_chat,
-)
-from .keyboards import get_paginated_list_keyboard
-
-from ..models.base_bot import BaseBot
-from ..models.config import TGConfig
-from ..models.base_handlers import BaseHandler
-from ..models.handlers_response import KeyboardResponse
-
 
 class TelegramBot:
     def __init__(
         self,
         telegram_token: str,
-        bot: BaseBot,
-        telegram_bot_config: TGConfig,
     ):
         self.telegram_token = telegram_token
-        self.telegram_bot_config = telegram_bot_config
-        self.commands = bot.commands
-        self.messages = bot.messages
-        self.callbacks = bot.callbacks
         self.logger = logging.getLogger("TelegramBot")
 
     async def post_init(self, application: Application) -> None:
@@ -101,82 +80,6 @@ class TelegramBot:
         self.logger.error(
             msg="Exception while handling an update:", exc_info=context.error
         )
-
-    async def handle(
-        self, update: Update, context: CallbackContext, bot_handler: BaseHandler
-    ) -> None:
-        """
-        Handles the update and sends the response back to the user.
-        """
-        handler_context = await get_context(update, context)
-        handler_person = await get_person(update, context)
-        handler_message = await get_message(update, context)
-        handler_args = await get_args(update, context)
-
-        if bot_handler.streamable and self.telegram_bot_config.enable_message_streaming:
-            first_message_id = None
-            async for result in buffer_streaming_response(
-                bot_handler.stream_handle(
-                    person=handler_person,
-                    context=handler_context,
-                    message=handler_message,
-                    args=handler_args,
-                ),
-                is_group_chat(update=update),
-            ):
-                latest_text_response = result.localized_text
-                await self.push_state(update, context, "sending_text")
-                if latest_text_response and first_message_id is None:
-                    message = await self.send_message(
-                        context=context,
-                        chat_id=update.effective_chat.id,
-                        text=latest_text_response,
-                        reply_message_id=update.effective_message.message_id,
-                        thread_id=handler_context.thread_id,
-                        parse_mode=ParseMode.HTML,
-                        keyboard=result.keyboard,
-                    )
-                    first_message_id = message.message_id
-                elif latest_text_response and first_message_id is not None:
-                    await context.bot.edit_message_text(
-                        chat_id=update.effective_chat.id,
-                        message_id=first_message_id,
-                        text=latest_text_response,
-                        parse_mode=ParseMode.HTML,
-                        reply_markup=result.keyboard,
-                    )
-                elif latest_text_response is None and result.keyboard is not None:
-                    await self.send_message(
-                        context=context,
-                        chat_id=update.effective_chat.id,
-                        text=latest_text_response,
-                        reply_message_id=first_message_id,
-                        thread_id=handler_context.thread_id,
-                        parse_mode=ParseMode.HTML,
-                        keyboard=result.keyboard,
-                    )
-                await asyncio.sleep(0.5)
-        else:
-            result = await bot_handler.handle(
-                person=handler_person,
-                context=handler_context,
-                message=handler_message,
-                args=handler_args,
-            )
-            if result is None:
-                return
-            text_response = result.localized_text
-
-            await self.push_state(update, context, "sending_text")
-            await self.send_message(
-                context=context,
-                chat_id=update.effective_chat.id,
-                text=text_response,
-                reply_message_id=update.effective_message.message_id,
-                thread_id=handler_context.thread_id,
-                parse_mode=ParseMode.HTML,
-                keyboard=result.keyboard,
-            )
 
     async def push_state(
         self,
