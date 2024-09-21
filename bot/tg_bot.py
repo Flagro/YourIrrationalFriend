@@ -12,7 +12,6 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 
 import logging
-import asyncio
 from typing import Literal, Optional
 from functools import partial
 
