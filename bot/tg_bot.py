@@ -106,25 +106,10 @@ class TelegramBot:
         reply_message_id: Optional[int] = None,
         thread_id: Optional[int] = None,
         parse_mode: Optional[ParseMode] = ParseMode.HTML,
-        keyboard: Optional[KeyboardResponse] = None,
     ) -> None:
-        if keyboard:
-            markup = get_paginated_list_keyboard(
-                value_id_to_name=keyboard.modes_dict,
-                callback=keyboard.callback,
-                button_action=keyboard.button_action,
-            )
-            return await context.bot.send_message(
-                chat_id=chat_id,
-                text=text,
-                reply_to_message_id=reply_message_id,
-                parse_mode=parse_mode,
-                reply_markup=markup,
-            )
-        else:
-            return await context.bot.send_message(
-                chat_id=chat_id,
-                text=text,
-                reply_to_message_id=reply_message_id,
-                parse_mode=parse_mode,
-            )
+        return await context.bot.send_message(
+            chat_id=chat_id,
+            text=text,
+            reply_to_message_id=reply_message_id,
+            parse_mode=parse_mode,
+        )
