@@ -10,3 +10,4 @@ Commands:
 - `/stop` stop the bot
 - `/reset` reset the bot
 - `/bio [your bio]` provide more context about yourself
+- `/help` show help message
