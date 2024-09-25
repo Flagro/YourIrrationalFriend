@@ -12,7 +12,7 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 
 import logging
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 from functools import partial
 
 
@@ -20,8 +20,12 @@ class TelegramBot:
     def __init__(
         self,
         telegram_token: str,
+        openai_token: str,
+        allowed_handles: List[str],
     ):
         self.telegram_token = telegram_token
+        self.openai_token = openai_token
+        self.allowed_handles = allowed_handles
         self.logger = logging.getLogger("TelegramBot")
 
     async def post_init(self, application: Application) -> None:
