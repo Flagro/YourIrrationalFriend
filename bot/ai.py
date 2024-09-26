@@ -1,20 +1,10 @@
 import tiktoken
-import io
 from typing import AsyncIterator, Literal
 from openai import OpenAI
-from langchain_openai import OpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
-
-from ...models.config.ai_config import AIConfig
-from ..prompt_manager import PromptManager
-from .agent_tools.describe_image import describe_image, ImageInformation
-from .agent_tools.check_engage_needed import check_engage_needed
 
 
 class AI:
-    def __init__(self, openai_api_key: str, ai_config: AIConfig, prompt_manager: PromptManager):
-        self.ai_config = ai_config
-        self.prompt_manager = prompt_manager
+    def __init__(self, openai_api_key: str):
         self.llm = OpenAI(
             api_key=openai_api_key, model=self._get_default_text_model_name()
         )
