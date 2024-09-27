@@ -5,13 +5,7 @@ from openai import OpenAI
 
 class AI:
     def __init__(self, openai_api_key: str, default_text_model_name: str):
-        self.llm = OpenAI(
-            api_key=openai_api_key, model=self._get_default_text_model_name()
-        )
-        self.vision_model = OpenAI(
-            api_key=openai_api_key,
-            model=default_text_model_name,
-        )
+        self.llm = OpenAI(api_key=openai_api_key, model=default_text_model_name)
 
     async def is_content_acceptable(self, text: str):
         # TODO: implement this
