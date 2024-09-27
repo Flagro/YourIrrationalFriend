@@ -17,15 +17,6 @@ class AI:
     def count_tokens(text: str):
         return tiktoken.count(text)
 
-    async def get_reply(self, user_input: str, system_prompt: str) -> str:
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_input),
-        ]
-        temperature = (self.ai_config.TextGeneration.temperature,)
-        response = await self.llm.ainvoke(messages, temperature=temperature)
-        return response.content
-
     async def get_streaming_reply(
         self, user_input: str, system_prompt: str
     ) -> AsyncIterator[str]:
