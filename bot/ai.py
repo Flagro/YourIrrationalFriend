@@ -4,8 +4,9 @@ from openai import OpenAI
 
 
 class AI:
-    def __init__(self, openai_api_key: str, default_text_model_name: str):
+    def __init__(self, openai_api_key: str, default_text_model_name: str, default_temperature: float = 0.7):
         self.llm = OpenAI(api_key=openai_api_key, model=default_text_model_name)
+        self.default_temperature = default_temperature
 
     async def is_content_acceptable(self, text: str):
         # TODO: implement this
@@ -24,6 +25,5 @@ class AI:
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_input),
         ]
-        temperature = (self.ai_config.TextGeneration.temperature,)
-        for chunk in await self.llm.astream(messages, temperature=temperature):
+        for chunk in await self.llm.astream(messages, temperature=self.default_temperature):
             yield chunk.content
