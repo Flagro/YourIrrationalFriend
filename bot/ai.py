@@ -21,6 +21,9 @@ class AI:
     async def get_streaming_reply(
         self, user_input: str, system_prompt: str
     ) -> AsyncIterator[str]:
+        if not self.is_content_acceptable(user_input):
+            yield "I'm sorry, I can't respond to that."
+            return
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=user_input),
