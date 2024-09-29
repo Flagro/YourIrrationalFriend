@@ -5,7 +5,6 @@ from telegram.ext import (
     CallbackContext,
     CommandHandler,
     MessageHandler,
-    CallbackQueryHandler,
     filters,
     Application,
 )
@@ -66,15 +65,8 @@ class TelegramBot:
             )
             for message in self.messages
         ]
-        callback_handlers = [
-            CallbackQueryHandler(
-                partial(self.handle, bot_handler=callback),
-                "^" + callback.callback_action,
-            )
-            for callback in self.callbacks
-        ]
         application.add_handlers(
-            command_handlers + message_handlers + callback_handlers
+            command_handlers + message_handlers
         )
         application.add_error_handler(self.error_handle)
         application.run_polling()
