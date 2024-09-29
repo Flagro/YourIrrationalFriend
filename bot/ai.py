@@ -1,11 +1,17 @@
 import tiktoken
-from typing import AsyncIterator, Literal
+from typing import AsyncIterator
 from openai import OpenAI
 
 
 class AI:
-    def __init__(self, openai_api_key: str, default_text_model_name: str, default_temperature: float = 0.7):
-        self.llm = OpenAI(api_key=openai_api_key, model=default_text_model_name)
+    def __init__(
+        self,
+        openai_api_key: str,
+        default_text_model_name: str,
+        default_temperature: float = 0.7,
+    ):
+        self.client = OpenAI(api_key=openai_api_key)
+        self.default_text_model_name = default_text_model_name
         self.default_temperature = default_temperature
 
     async def is_content_acceptable(self, text: str):
@@ -21,12 +27,15 @@ class AI:
     async def get_streaming_reply(
         self, user_input: str, system_prompt: str
     ) -> AsyncIterator[str]:
-        if not self.is_content_acceptable(user_input):
-            yield "I'm sorry, I can't respond to that."
-            return
-        messages = [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=user_input),
-        ]
-        for chunk in await self.llm.astream(messages, temperature=self.default_temperature):
-            yield chunk.content
+        response = self.client.chat.completions.create(
+            model=self.default_text_model_name,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input},
+            ],
+            stream=True,
+            temperature=self.default_temperature,
+        )
+        for chunk in response:
+            chunk_text = chunk.choices[0].delta.content
+            yield chunk_text
