@@ -1,12 +1,7 @@
-import io
-
 from typing import List, Optional, AsyncIterator
 
 from telegram import Update, constants
 from telegram.ext import ContextTypes
-
-from ..models.handlers_input import Person, Context, Message
-from ..models.handlers_response import LocalizedCommandResponse
 
 
 def is_callback(update: Update) -> bool:
@@ -80,13 +75,6 @@ async def get_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Mes
     message = update.message.text
     is_bot_mentioned = bot_mentioned(update, context)
     # get image and audio in memory
-    image = None
-    if is_bot_mentioned and update.message.photo:
-        image = get_file_in_memory(update.message.photo[-1].file_id, context)
-
-    voice = None
-    if is_bot_mentioned and update.message.voice:
-        voice = get_file_in_memory(update.message.voice.file_id, context)
     return Message(
         message_text=message,
         timestamp=update.message.date,
@@ -116,16 +104,6 @@ def bot_mentioned(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
         and update.message.reply_to_message.from_user.id == context.bot.id
     )
     return is_private_chat or bot_in_reply_tree or is_bot_mentioned
-
-
-async def get_file_in_memory(
-    file_id: str, context: ContextTypes.DEFAULT_TYPE
-) -> io.BytesIO:
-    file = await context.bot.getFile(file_id)
-    file_stream = io.BytesIO()
-    await file.download(out=file_stream)
-    file_stream.seek(0)
-    return file_stream
 
 
 def get_thread_id(update: Update) -> Optional[int]:
