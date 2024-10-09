@@ -21,68 +21,6 @@ async def is_group_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return False
 
 
-async def get_context(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Context:
-    if is_callback(update):
-        return Context(
-            chat_id=update.callback_query.message.chat.id,
-            chat_name=update.callback_query.message.chat.title,
-            thread_id=None,
-            is_group=True,
-            is_bot_mentioned=False,
-            replied_to_user_handle=None,
-        )
-    else:
-        replied_to_user_handle = (
-            "@" + str(update.message.reply_to_message.from_user.username)
-            if update.message.reply_to_message
-            else None
-        )
-        return Context(
-            chat_id=update.message.chat_id,
-            chat_name=update.message.chat.title,
-            thread_id=get_thread_id(update),
-            is_group=True,
-            is_bot_mentioned=bot_mentioned(update, context),
-            replied_to_user_handle=replied_to_user_handle,
-        )
-
-
-async def get_person(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Person:
-    if is_callback(update):
-        return Person(
-            user_handle="@" + update.callback_query.from_user.username,
-            first_name=update.callback_query.from_user.first_name,
-            last_name=update.callback_query.from_user.last_name,
-            is_group_admin=await is_group_admin(update, context),
-        )
-    else:
-        return Person(
-            user_handle="@" + update.message.from_user.username,
-            first_name=update.message.from_user.first_name,
-            last_name=update.message.from_user.last_name,
-            is_group_admin=await is_group_admin(update, context),
-        )
-
-
-async def get_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Message:
-    if is_callback(update):
-        return Message(
-            message_text=update.callback_query.message.text,
-            timestamp=update.callback_query.message.date,
-            in_file_image=None,
-            in_file_audio=None,
-        )
-    message = update.message.text
-    is_bot_mentioned = bot_mentioned(update, context)
-    # get image and audio in memory
-    return Message(
-        message_text=message,
-        timestamp=update.message.date,
-        in_file_image=image,
-        in_file_audio=voice,
-    )
-
-
 async def get_args(update: Update, context: ContextTypes.DEFAULT_TYPE) -> List[str]:
     if is_callback(update):
         query = update.callback_query
