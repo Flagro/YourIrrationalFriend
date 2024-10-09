@@ -139,20 +139,20 @@ def is_group_chat(update: Update) -> bool:
 
 
 async def buffer_streaming_response(
-    stream: AsyncIterator[LocalizedCommandResponse], is_group_chat: bool
-) -> AsyncIterator[LocalizedCommandResponse]:
+    stream: AsyncIterator[str], is_group_chat: bool
+) -> AsyncIterator[str]:
     last_response_len = 0
     current_response = None
     i = 0
     async for chunk in stream:
         current_response = chunk
         i += 1
-        if len(chunk.localized_text) - last_response_len > min_char_diff_for_buffering(
-            chunk.localized_text, is_group_chat
+        if len(chunk) - last_response_len > min_char_diff_for_buffering(
+            chunk, is_group_chat
         ):
             yield current_response
             current_response = None
             i = 0
-            last_response_len = len(chunk.localized_text)
+            last_response_len = len(chunk)
     if i:
         yield current_response
