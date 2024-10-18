@@ -4,10 +4,6 @@ from telegram import Update, constants
 from telegram.ext import ContextTypes
 
 
-def is_callback(update: Update) -> bool:
-    return update.callback_query is not None
-
-
 async def is_group_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -22,13 +18,7 @@ async def is_group_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def get_args(update: Update, context: ContextTypes.DEFAULT_TYPE) -> List[str]:
-    if is_callback(update):
-        query = update.callback_query
-        await query.answer()
-        args = query.data.split("|")[1:]
-        return args
-    else:
-        return context.args
+    return context.args
 
 
 def bot_mentioned(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
